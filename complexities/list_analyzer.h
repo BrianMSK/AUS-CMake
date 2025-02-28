@@ -1,6 +1,7 @@
 #pragma once
 
 #include <complexities/complexity_analyzer.h>
+#include <cstddef>
 #include <list>
 #include <random>
 #include <vector>
@@ -62,7 +63,7 @@ template <class List>
 ListAnalyzer<List>::ListAnalyzer(const std::string &name)
     : ComplexityAnalyzer<List>(name), rngData_(144), rngIndex_(144), index_(0),
       data_(0) {
-  registerBeforeOperation([&](List &l) {
+  ComplexityAnalyzer<List>::registerBeforeOperation([&](List &l) {
     index_ = rngIndex_();
     data_ = rngData_();
   });
@@ -70,9 +71,10 @@ ListAnalyzer<List>::ListAnalyzer(const std::string &name)
 
 template <class List>
 void ListAnalyzer<List>::growToSize(List &structure, size_t size) {
-  // TODO 01
-  // po implementacii vymazte vyhodenie vynimky!
-  throw std::runtime_error("Not implemented yet");
+  size_t structSize = structure.size();
+  for (size_t i = 0; i < size - structSize; ++i) {
+    structure.push_back(rngData_());
+  }
 }
 
 template <class List> size_t ListAnalyzer<List>::getRandomIndex() const {
@@ -91,9 +93,7 @@ ListInsertAnalyzer<List>::ListInsertAnalyzer(const std::string &name)
 
 template <class List>
 void ListInsertAnalyzer<List>::executeOperation(List &structure) {
-  // TODO 01
-  // po implementacii vymazte vyhodenie vynimky!
-  throw std::runtime_error("Not implemented yet");
+  structure.insert(structure.begin(), ListAnalyzer<List>::getRandomData());
 }
 
 //----------
@@ -104,9 +104,7 @@ ListRemoveAnalyzer<List>::ListRemoveAnalyzer(const std::string &name)
 
 template <class List>
 void ListRemoveAnalyzer<List>::executeOperation(List &structure) {
-  // TODO 01
-  // po implementacii vymazte vyhodenie vynimky!
-  throw std::runtime_error("Not implemented yet");
+  //
 }
 
 //----------
