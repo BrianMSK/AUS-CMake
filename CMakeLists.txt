@@ -14,3 +14,5 @@ add_subdirectory(libds)
 add_subdirectory(tests)
 
 add_subdirectory(cli)
+
+add_subdirectory(lab3)

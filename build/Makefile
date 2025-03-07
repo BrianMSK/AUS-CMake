@@ -155,6 +155,19 @@ main/fast:
 	$(MAKE) $(MAKESILENT) -f cli/CMakeFiles/main.dir/build.make cli/CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+#=============================================================================
+# Target rules for targets named lab3
+
+# Build rule for target.
+lab3: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 lab3
+.PHONY : lab3
+
+# fast build rule for target.
+lab3/fast:
+	$(MAKE) $(MAKESILENT) -f lab3/CMakeFiles/lab3.dir/build.make lab3/CMakeFiles/lab3.dir/build
+.PHONY : lab3/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -164,6 +177,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... complexities"
+	@echo "... lab3"
 	@echo "... main"
 	@echo "... tests"
 .PHONY : help

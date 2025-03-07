@@ -57,6 +57,11 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/Users/DenkoPC/Development/AUS-CMake/aus/build/cli/cmake_install.cmake")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/Users/DenkoPC/Development/AUS-CMake/aus/build/lab3/cmake_install.cmake")
+endif()
+
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)

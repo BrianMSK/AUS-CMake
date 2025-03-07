@@ -12,6 +12,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.31.5/CMakeSystem.cmake"
   "/Users/DenkoPC/Development/AUS-CMake/aus/cli/CMakeLists.txt"
   "/Users/DenkoPC/Development/AUS-CMake/aus/complexities/CMakeLists.txt"
+  "/Users/DenkoPC/Development/AUS-CMake/aus/lab3/CMakeLists.txt"
   "/Users/DenkoPC/Development/AUS-CMake/aus/libds/CMakeLists.txt"
   "/Users/DenkoPC/Development/AUS-CMake/aus/tests/CMakeLists.txt"
   "/opt/homebrew/share/cmake/Modules/CMakeCXXInformation.cmake"
@@ -52,6 +53,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "libds/CMakeFiles/CMakeDirectoryInformation.cmake"
   "tests/CMakeFiles/CMakeDirectoryInformation.cmake"
   "cli/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "lab3/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
@@ -59,4 +61,5 @@ set(CMAKE_DEPEND_INFO_FILES
   "complexities/CMakeFiles/complexities.dir/DependInfo.cmake"
   "tests/CMakeFiles/tests.dir/DependInfo.cmake"
   "cli/CMakeFiles/main.dir/DependInfo.cmake"
+  "lab3/CMakeFiles/lab3.dir/DependInfo.cmake"
   )

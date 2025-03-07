@@ -11,3 +11,6 @@
 /Users/DenkoPC/Development/AUS-CMake/aus/build/cli/CMakeFiles/main.dir
 /Users/DenkoPC/Development/AUS-CMake/aus/build/cli/CMakeFiles/edit_cache.dir
 /Users/DenkoPC/Development/AUS-CMake/aus/build/cli/CMakeFiles/rebuild_cache.dir
+/Users/DenkoPC/Development/AUS-CMake/aus/build/lab3/CMakeFiles/lab3.dir
+/Users/DenkoPC/Development/AUS-CMake/aus/build/lab3/CMakeFiles/edit_cache.dir
+/Users/DenkoPC/Development/AUS-CMake/aus/build/lab3/CMakeFiles/rebuild_cache.dir
