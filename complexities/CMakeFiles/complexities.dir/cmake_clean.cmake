@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/complexities.dir/complexity_analyzer.cpp.o"
   "CMakeFiles/complexities.dir/complexity_analyzer.cpp.o.d"
-  "libcomplexities.dylib"
   "libcomplexities.pdb"
+  "libcomplexities.so"
 )
 
 # Per-language clean rules from dependency scanning.

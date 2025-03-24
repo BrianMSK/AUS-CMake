@@ -8,17 +8,13 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/DenkoPC/Development/AUS-CMake/aus/tests/_details/console.cpp" "tests/CMakeFiles/tests.dir/_details/console.cpp.o" "gcc" "tests/CMakeFiles/tests.dir/_details/console.cpp.o.d"
-  "/Users/DenkoPC/Development/AUS-CMake/aus/tests/_details/console_output.cpp" "tests/CMakeFiles/tests.dir/_details/console_output.cpp.o" "gcc" "tests/CMakeFiles/tests.dir/_details/console_output.cpp.o.d"
-  "/Users/DenkoPC/Development/AUS-CMake/aus/tests/_details/test.cpp" "tests/CMakeFiles/tests.dir/_details/test.cpp.o" "gcc" "tests/CMakeFiles/tests.dir/_details/test.cpp.o.d"
+  "/home/denis/AUS-CMake/tests/_details/console.cpp" "tests/CMakeFiles/tests.dir/_details/console.cpp.o" "gcc" "tests/CMakeFiles/tests.dir/_details/console.cpp.o.d"
+  "/home/denis/AUS-CMake/tests/_details/console_output.cpp" "tests/CMakeFiles/tests.dir/_details/console_output.cpp.o" "gcc" "tests/CMakeFiles/tests.dir/_details/console_output.cpp.o.d"
+  "/home/denis/AUS-CMake/tests/_details/test.cpp" "tests/CMakeFiles/tests.dir/_details/test.cpp.o" "gcc" "tests/CMakeFiles/tests.dir/_details/test.cpp.o.d"
   )
 
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
-  )
-
-# Targets to which this target links which contain Fortran sources.
-set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.

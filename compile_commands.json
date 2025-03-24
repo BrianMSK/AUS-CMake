@@ -1,32 +1,32 @@
 [
 {
-  "directory": "/Users/DenkoPC/Development/AUS-CMake/aus/complexities",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -Dcomplexities_EXPORTS -I/Users/DenkoPC/Development/AUS-CMake/aus -std=c++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -fPIC -o CMakeFiles/complexities.dir/complexity_analyzer.cpp.o -c /Users/DenkoPC/Development/AUS-CMake/aus/complexities/complexity_analyzer.cpp",
-  "file": "/Users/DenkoPC/Development/AUS-CMake/aus/complexities/complexity_analyzer.cpp",
-  "output": "complexities/CMakeFiles/complexities.dir/complexity_analyzer.cpp.o"
+  "directory": "/home/denis/AUS-CMake/complexities",
+  "command": "/usr/bin/c++ -Dcomplexities_EXPORTS -I/home/denis/AUS-CMake -fPIC -o CMakeFiles/complexities.dir/complexity_analyzer.cpp.o -c /home/denis/AUS-CMake/complexities/complexity_analyzer.cpp",
+  "file": "/home/denis/AUS-CMake/complexities/complexity_analyzer.cpp"
 },
 {
-  "directory": "/Users/DenkoPC/Development/AUS-CMake/aus/tests",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -Dtests_EXPORTS -I/Users/DenkoPC/Development/AUS-CMake/aus -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -fPIC -o CMakeFiles/tests.dir/_details/console_output.cpp.o -c /Users/DenkoPC/Development/AUS-CMake/aus/tests/_details/console_output.cpp",
-  "file": "/Users/DenkoPC/Development/AUS-CMake/aus/tests/_details/console_output.cpp",
-  "output": "tests/CMakeFiles/tests.dir/_details/console_output.cpp.o"
+  "directory": "/home/denis/AUS-CMake/tests",
+  "command": "/usr/bin/c++ -Dtests_EXPORTS -I/home/denis/AUS-CMake -fPIC -o CMakeFiles/tests.dir/_details/console_output.cpp.o -c /home/denis/AUS-CMake/tests/_details/console_output.cpp",
+  "file": "/home/denis/AUS-CMake/tests/_details/console_output.cpp"
 },
 {
-  "directory": "/Users/DenkoPC/Development/AUS-CMake/aus/tests",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -Dtests_EXPORTS -I/Users/DenkoPC/Development/AUS-CMake/aus -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -fPIC -o CMakeFiles/tests.dir/_details/console.cpp.o -c /Users/DenkoPC/Development/AUS-CMake/aus/tests/_details/console.cpp",
-  "file": "/Users/DenkoPC/Development/AUS-CMake/aus/tests/_details/console.cpp",
-  "output": "tests/CMakeFiles/tests.dir/_details/console.cpp.o"
+  "directory": "/home/denis/AUS-CMake/tests",
+  "command": "/usr/bin/c++ -Dtests_EXPORTS -I/home/denis/AUS-CMake -fPIC -o CMakeFiles/tests.dir/_details/console.cpp.o -c /home/denis/AUS-CMake/tests/_details/console.cpp",
+  "file": "/home/denis/AUS-CMake/tests/_details/console.cpp"
 },
 {
-  "directory": "/Users/DenkoPC/Development/AUS-CMake/aus/tests",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -Dtests_EXPORTS -I/Users/DenkoPC/Development/AUS-CMake/aus -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -fPIC -o CMakeFiles/tests.dir/_details/test.cpp.o -c /Users/DenkoPC/Development/AUS-CMake/aus/tests/_details/test.cpp",
-  "file": "/Users/DenkoPC/Development/AUS-CMake/aus/tests/_details/test.cpp",
-  "output": "tests/CMakeFiles/tests.dir/_details/test.cpp.o"
+  "directory": "/home/denis/AUS-CMake/tests",
+  "command": "/usr/bin/c++ -Dtests_EXPORTS -I/home/denis/AUS-CMake -fPIC -o CMakeFiles/tests.dir/_details/test.cpp.o -c /home/denis/AUS-CMake/tests/_details/test.cpp",
+  "file": "/home/denis/AUS-CMake/tests/_details/test.cpp"
 },
 {
-  "directory": "/Users/DenkoPC/Development/AUS-CMake/aus/cli",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DANALYZER_OUTPUT=\\\"/Users/DenkoPC/Development/AUS-CMake/aus\\\" -I/Users/DenkoPC/Development/AUS-CMake/aus -std=c++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -o CMakeFiles/main.dir/main.cpp.o -c /Users/DenkoPC/Development/AUS-CMake/aus/cli/main.cpp",
-  "file": "/Users/DenkoPC/Development/AUS-CMake/aus/cli/main.cpp",
-  "output": "cli/CMakeFiles/main.dir/main.cpp.o"
+  "directory": "/home/denis/AUS-CMake/cli",
+  "command": "/usr/bin/c++ -DANALYZER_OUTPUT=\\\"/home/denis/AUS-CMake\\\" -I/home/denis/AUS-CMake  -o CMakeFiles/main.dir/main.cpp.o -c /home/denis/AUS-CMake/cli/main.cpp",
+  "file": "/home/denis/AUS-CMake/cli/main.cpp"
+},
+{
+  "directory": "/home/denis/AUS-CMake/lab3",
+  "command": "/usr/bin/c++  -I/home/denis/AUS-CMake  -o CMakeFiles/lab3.dir/main.cpp.o -c /home/denis/AUS-CMake/lab3/main.cpp",
+  "file": "/home/denis/AUS-CMake/lab3/main.cpp"
 }
 ]

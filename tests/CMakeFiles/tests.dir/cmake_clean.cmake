@@ -5,8 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/tests.dir/_details/console_output.cpp.o.d"
   "CMakeFiles/tests.dir/_details/test.cpp.o"
   "CMakeFiles/tests.dir/_details/test.cpp.o.d"
-  "libtests.dylib"
   "libtests.pdb"
+  "libtests.so"
 )
 
 # Per-language clean rules from dependency scanning.

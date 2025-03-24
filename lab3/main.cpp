@@ -1,6 +1,6 @@
 #include <iostream>
 #include <libds/mm/compact_memory_manager.h>
-
+#include <vector>
 struct Osoba {
   int id;
   short vek;
