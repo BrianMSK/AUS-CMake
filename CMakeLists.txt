@@ -16,3 +16,5 @@ add_subdirectory(tests)
 add_subdirectory(cli)
 
 add_subdirectory(lab3)
+
+add_subdirectory(sem)
