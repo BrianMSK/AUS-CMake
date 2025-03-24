@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/main.dir/main.cpp.o -o main  -Wl,-rpath,/home/denis/AUS-CMake/tests:/home/denis/AUS-CMake/complexities ../tests/libtests.so ../complexities/libcomplexities.so 
