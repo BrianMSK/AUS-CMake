@@ -1,5 +1,4 @@
 #include <fstream>
-#include <functional>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -27,14 +26,14 @@ public:
 
 class BusStopFilter {
 public:
-  template <typename T>
-  T filterT(const T &structure_,
-            std::function<bool(const typename T::value_type &)> predicate_) {
-    // budeme prepokladat ze T ma metodu push_back a vieme cez nu robit foreach
+  template <typename T, typename Iterator, typename Predicate>
+  T filterT(Iterator itBeg_, Iterator itEnd_, Predicate predicate_) {
     T structureLoc;
-    for (const auto &var : structure_) {
-      if (predicate_(var))
-        structureLoc.push_back(var);
+    while (itBeg_ != itEnd_) {
+      if (predicate_(*itBeg_)) {
+        structureLoc.push_back(*itBeg_);
+      }
+      ++itBeg_;
     }
     return structureLoc;
   }
@@ -75,7 +74,7 @@ int main() {
   std::vector<BusStop> locBusStops = loadBusStopsFromCSV("GRT_Stops_orig.csv");
 
   std::string municipality = "Kitchener";
-  std::string street = "King";
+  std::string street = "King St";
   double minLat = 43.4;
   double maxLat = 43.6;
   double minLong = -80.5;
@@ -94,12 +93,15 @@ int main() {
   };
 
   BusStopFilter BSF;
-  std::vector<BusStop> filtByMunic = BSF.filterT(locBusStops, isMunicipality);
-  std::vector<BusStop> filtByStreet = BSF.filterT(locBusStops, isOnStreet);
-  std::vector<BusStop> filtByRegion = BSF.filterT(locBusStops, isInRegion);
+  std::vector<BusStop> filtByMunic = BSF.filterT<std::vector<BusStop>>(
+      locBusStops.begin(), locBusStops.end(), isMunicipality);
+  std::vector<BusStop> filtByStreet = BSF.filterT<std::vector<BusStop>>(
+      locBusStops.begin(), locBusStops.end(), isOnStreet);
+  std::vector<BusStop> filtByRegion = BSF.filterT<std::vector<BusStop>>(
+      locBusStops.begin(), locBusStops.end(), isInRegion);
 
   int i = 0;
-  for (const auto &var : filtByRegion) {
+  for (const auto &var : filtByMunic) {
     ++i;
     std::cout << "ID: " << var.getStopID() << ", Street: " << var.getStreet()
               << ", Municipality: " << var.getMunicipality()
