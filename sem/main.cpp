@@ -26,9 +26,9 @@ public:
 
 class BusStopFilter {
 public:
-  template <typename T, typename Iterator, typename Predicate>
-  T filterT(Iterator itBeg_, Iterator itEnd_, Predicate predicate_) {
-    T structureLoc;
+  template <typename containerT, typename Iterator, typename Predicate>
+  containerT filterT(Iterator itBeg_, Iterator itEnd_, Predicate predicate_) {
+    containerT structureLoc;
     while (itBeg_ != itEnd_) {
       if (predicate_(*itBeg_)) {
         structureLoc.push_back(*itBeg_);
