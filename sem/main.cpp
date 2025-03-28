@@ -74,7 +74,7 @@ int main() {
   std::vector<BusStop> locBusStops = loadBusStopsFromCSV("GRT_Stops_orig.csv");
 
   std::string municipality = "Kitchener";
-  std::string street = "King St";
+  std::string street = "Regina St";
   double minLat = 43.4;
   double maxLat = 43.6;
   double minLong = -80.5;
@@ -101,7 +101,7 @@ int main() {
       locBusStops.begin(), locBusStops.end(), isInRegion);
 
   int i = 0;
-  for (const auto &var : filtByMunic) {
+  for (const auto &var : filtByStreet) {
     ++i;
     std::cout << "ID: " << var.getStopID() << ", Street: " << var.getStreet()
               << ", Municipality: " << var.getMunicipality()
