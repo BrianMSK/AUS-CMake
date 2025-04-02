@@ -1,6 +1,7 @@
 #pragma once
 
 #include "libds/constants.h"
+#include <cmath>
 #include <libds/amt/abstract_memory_type.h>
 #include <libds/amt/hierarchy.h>
 
@@ -80,9 +81,7 @@ ImplicitHierarchy<DataType, K>::level(const MemoryBlock<DataType> &node) const {
 
 template <typename DataType, size_t K>
 size_t ImplicitHierarchy<DataType, K>::level(size_t index) const {
-  // TODO 05
-  // po implementacii vymazte vyhodenie vynimky!
-  throw std::runtime_error("Not implemented yet");
+  return static_cast<size_t>(std::floor(log((K - 1) * (index + 1)) / log(K)));
 }
 
 template <typename DataType, size_t K>
@@ -93,31 +92,24 @@ size_t ImplicitHierarchy<DataType, K>::degree(
 
 template <typename DataType, size_t K>
 size_t ImplicitHierarchy<DataType, K>::degree(size_t index) const {
-  int currentLevel = level(index);
-  int indexOfLast = this->size() - 1;
-  int depth = level(indexOfLast);
+  const size_t currentLevel = this->level(index);
+  const size_t indexOfLast = this->size() - 1;
+  const size_t depth = this->level(indexOfLast);
+
   if (currentLevel == depth) {
     return 0;
-  } else {
-    if (currentLevel == depth - 1) {
-      int indexOfLastFather = indexOfParent(indexOfLast);
-      if (index < indexOfLastFather) {
-        return K;
-      } else {
-        if (index > indexOfLastFather) {
-          return 0;
-        } else {
-          int mode = (this->size() - 1) % K;
-          if (mode == 0) {
-            return K;
-          } else {
-            return mode;
-          }
-        }
-      }
-    } else {
+  } else if (currentLevel == depth - 1) {
+    const size_t indexOfLastsParent = indexOfParent(indexOfLast);
+    if (index < indexOfLastsParent) {
       return K;
+    } else if (index > indexOfLastsParent) {
+      return 0;
+    } else {
+      const size_t mod = (this->size() - 1) % K;
+      return mod == 0 ? K : mod;
     }
+  } else {
+    return K;
   }
 }
 
@@ -147,14 +139,14 @@ MemoryBlock<DataType> *
 ImplicitHierarchy<DataType, K>::accessSon(const MemoryBlock<DataType> &node,
                                           size_t sonOrder) const {
   const size_t index = this->indexOfSon(node, sonOrder);
-  return index != INVALID_INDEX ? &this->getMemoryManager()->getBlockAt(index)
-                                : nullptr;
+  return index < this->size() ? &this->getMemoryManager()->getBlockAt(index)
+                              : nullptr;
 }
 
 template <typename DataType, size_t K>
 MemoryBlock<DataType> *ImplicitHierarchy<DataType, K>::accessLastLeaf() const {
   int size = this->size();
-  return size > 0 ? &this->getMemoryManager()->getBlockAt(size - 1) : nullptr;
+  return size != 0 ? &this->getMemoryManager()->getBlockAt(size - 1) : nullptr;
 }
 
 template <typename DataType, size_t K>
@@ -211,9 +203,7 @@ size_t ImplicitHierarchy<DataType, K>::indexOfParent(
 
 template <typename DataType, size_t K>
 size_t ImplicitHierarchy<DataType, K>::indexOfParent(size_t index) const {
-  // TODO 05
-  // po implementacii vymazte vyhodenie vynimky!
-  throw std::runtime_error("Not implemented yet");
+  return 0 == index ? INVALID_INDEX : (index - 1) / K;
 }
 
 template <typename DataType, size_t K>
@@ -227,9 +217,7 @@ ImplicitHierarchy<DataType, K>::indexOfSon(const MemoryBlock<DataType> &node,
 template <typename DataType, size_t K>
 size_t ImplicitHierarchy<DataType, K>::indexOfSon(size_t indexOfParent,
                                                   size_t sonOrder) const {
-  // TODO 05
-  // po implementacii vymazte vyhodenie vynimky!
-  throw std::runtime_error("Not implemented yet");
+  return K * indexOfParent + sonOrder + 1;
 }
 
 } // namespace ds::amt
