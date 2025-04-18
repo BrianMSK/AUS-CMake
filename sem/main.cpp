@@ -33,6 +33,7 @@ public:
 };
 
 enum BSNTypes { COMPANY, MUNICIPALITY, STREET, BUSSTOP };
+
 class BusStopNode {
 private:
   BSNTypes type_;
@@ -186,10 +187,153 @@ std::vector<BusStop> loadBusStopsFromCSV(const std::string fileName) {
   return busStopsVec;
 }
 
+void collectAllBusStopsUnder(
+    ds::amt::MultiWayExplicitHierarchy<BusStopNode>::BlockType *node,
+    ds::amt::MultiWayExplicitHierarchy<BusStopNode> &hierarchy,
+    std::vector<BusStop> &out) {
+  hierarchy.processPreOrder(node, [&out](auto *b) {
+    if (b->data_.getType() == BUSSTOP) {
+      out.push_back(*b->data_.getBusStop());
+    }
+  });
+}
+
+class HierarchyNavigator {
+public:
+  using HierarchyT = ds::amt::MultiWayExplicitHierarchy<BusStopNode>;
+  using Block = HierarchyT::BlockType;
+
+  HierarchyNavigator(HierarchyT &h) : _h(h), _curr(h.accessRoot()) {}
+
+  void run() {
+    while (true) {
+      printMenu();
+      int cmd;
+      std::cin >> cmd;
+      if (cmd == 0)
+        break;
+      else if (cmd == 1)
+        goUp();
+      else if (cmd == 2)
+        chooseChild();
+      else if (cmd == 3)
+        runPredicates();
+      else
+        std::cout << "Unknown\n";
+    }
+  }
+
+private:
+  HierarchyT &_h;
+  Block *_curr;
+
+  void printMenu() {
+    std::cout << "\n=== You are at: [" << nodeDescription(_curr) << "]  (has "
+              << _h.degree(*_curr)
+              << " children)\n"
+                 "0) quit\n"
+                 "1) go up\n"
+                 "2) go to child #\n"
+                 "3) run level‑1 filter here\n"
+                 "Choose: ";
+  }
+
+  std::string nodeDescription(Block *b) {
+    auto &d = b->data_;
+    switch (d.getType()) {
+    case COMPANY:
+      return std::string("COMPANY:") + d.getName();
+    case MUNICIPALITY:
+      return std::string("MUNICIPALITY:") + d.getName();
+    case STREET:
+      return std::string("STREET:") + d.getName();
+    case BUSSTOP:
+      return std::string("BUSSTOP #") + d.getName();
+    }
+    return {};
+  }
+
+  void goUp() {
+    auto *p = _h.accessParent(*_curr);
+    if (!p)
+      std::cout << "Already at root\n";
+    else
+      _curr = p;
+  }
+
+  void chooseChild() {
+    std::cout << "Enter child index [0–" << _h.degree(*_curr) - 1 << "]: ";
+    size_t idx;
+    std::cin >> idx;
+    if (idx < _h.degree(*_curr) && _h.accessSon(*_curr, idx)) {
+      _curr = _h.accessSon(*_curr, idx);
+    } else {
+      std::cout << "Invalid index\n";
+    }
+  }
+
+  template <class Pred> void applyPredicate(const std::string &name, Pred p) {
+    std::vector<BusStop> all;
+    collectAllBusStopsUnder(_curr, _h, all);
+    BusStopFilter F;
+    auto filtered = F.filterT<std::vector<BusStop>>(all.begin(), all.end(), p);
+    std::cout << "\n-- " << name << " : found " << filtered.size()
+              << " stops\n";
+    for (auto &s : filtered) {
+      std::cout << "  ID=" << s.getStopID() << "  (" << s.getMunicipality()
+                << ", " << s.getStreet() << ")  long=" << s.getLongitude()
+                << "\n";
+    }
+  }
+
+  void runPredicates() {
+    std::cout << "\nPick predicate:\n"
+                 "1) longitude < -80.4841\n"
+                 "2) street-name contains \"Ave\"\n"
+                 "3) municipality == \"Kitchener\"\n"
+                 "Choice: ";
+    int c;
+    if (!(std::cin >> c)) {
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+      std::cout << "Bad choice (please enter 1, 2 or 3)\n";
+      return;
+    }
+    switch (c) {
+    case 1:
+      applyPredicate("Lon < -80.4841",
+                     [](auto &s) { return s.getLongitude() < -80.4841; });
+      break;
+    case 2:
+      applyPredicate("Street contains Ave", [](auto &s) {
+        return s.getStreet().find("Ave") != std::string::npos;
+      });
+      break;
+    case 3:
+      applyPredicate("Municipality==Kitchener", [](auto &s) {
+        return s.getMunicipality() == "Kitchener";
+      });
+      break;
+    default:
+      std::cout << "Bad choice\n";
+      break;
+    }
+  }
+};
+
 int main() {
-  std::vector<BusStop> locBusStops = loadBusStopsFromCSV("GRT_Stops.csv");
   auto locBusStopsHiearchy =
       loadBusStopsHiearchyFromCSV("GRT_Stops_sorted.csv");
+
+  HierarchyNavigator nav(locBusStopsHiearchy);
+  nav.run();
+
+  return 0;
+}
+
+int backup() {
+
+  std::vector<BusStop> locBusStops = loadBusStopsFromCSV("GRT_Stops.csv");
   std::string municipality = "Kitchener";
   std::string street = "Regina St";
   double minLat = 43.4;
