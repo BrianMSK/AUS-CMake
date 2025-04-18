@@ -43,30 +43,22 @@ public:
   BusStopNode() : type_(COMPANY), name_(), busStop_(std::nullopt) {}
   explicit BusStopNode(BSNTypes t, std::string n = {})
       : type_(t), name_(std::move(n)), busStop_(std::nullopt) {}
-  // convenience for leaf
   explicit BusStopNode(BusStop bs)
-      : type_(BUSSTOP),
-        name_(std::to_string(
-            bs.getStopID())), // or bs.getStreet(), whatever you prefer
+      : type_(BUSSTOP), name_(std::to_string(bs.getStopID())),
         busStop_(std::move(bs)) {}
 
-  // --- getters & setters for type
   BSNTypes getType() const { return type_; }
   void setType(BSNTypes t) { type_ = t; }
 
-  // --- getters & setters for name
   const std::string &getName() const { return name_; }
   void setName(const std::string &n) { name_ = n; }
   void setName(std::string &&n) { name_ = std::move(n); }
 
-  // --- busStop management
   bool hasBusStop() const { return busStop_.has_value(); }
 
-  // returns nullptr if none
   const BusStop *getBusStop() const { return busStop_ ? &*busStop_ : nullptr; }
   BusStop *getBusStop() { return busStop_ ? &*busStop_ : nullptr; }
 
-  // set or overwrite the BusStop (makes this a BUSSTOP node)
   void setBusStop(const BusStop &bs) {
     type_ = BUSSTOP;
     busStop_ = bs;
@@ -74,11 +66,8 @@ public:
   }
   void clearBusStop() { busStop_.reset(); }
 
-  // --- equality
   bool operator==(const BusStopNode &o) const {
-    return type_ == o.type_ && name_ == o.name_ &&
-           busStop_ ==
-               o.busStop_; // optional<T>::operator== does the right thing
+    return type_ == o.type_ && name_ == o.name_ && busStop_ == o.busStop_;
   }
 };
 
@@ -100,9 +89,7 @@ public:
 ds::amt::MultiWayExplicitHierarchy<BusStopNode>
 loadBusStopsHiearchyFromCSV(const std::string fileName) {
 
-  // Declare hiearchy and create local busStopNode_
   ds::amt::MultiWayExplicitHierarchy<BusStopNode> busStopsHierarchy;
-  BusStopNode busStopNode_;
   std::string currentMunicipalityName = "";
   std::string currentStreetName = "";
   size_t muniIndex_ = 0;
@@ -114,7 +101,6 @@ loadBusStopsHiearchyFromCSV(const std::string fileName) {
       static_cast<ds::amt::MultiWayExplicitHierarchy<BusStopNode>::BlockType *>(
           nullptr);
 
-  // ROOT SET
   auto &root = busStopsHierarchy.emplaceRoot();
   root.data_.setType(COMPANY);
   root.data_.setName("GRT");
@@ -133,7 +119,7 @@ loadBusStopsHiearchyFromCSV(const std::string fileName) {
     std::string substr;
     std::vector<std::string> tokens;
     int i = 0;
-    while (getline(ss, substr, ',')) {
+    while (getline(ss, substr, ';')) {
       ++i;
       if (!(i == 4 || i == 6 || (i >= 10 && i <= 12))) {
         continue;
