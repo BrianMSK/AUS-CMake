@@ -287,10 +287,19 @@ private:
   }
 
   void runPredicates() {
+    double longtitude = -80.4841;
+    std::string street = "Ave";
+    std::string municipality = "Kitchener";
     std::cout << "\nPick predicate:\n"
-                 "1) longitude < -80.4841\n"
-                 "2) street-name contains \"Ave\"\n"
-                 "3) municipality == \"Kitchener\"\n"
+                 "1) longitude < "
+              << longtitude
+              << "\n"
+                 "2) street-name contains "
+              << street
+              << "\n"
+                 "3) municipality == "
+              << municipality
+              << "\n"
                  "Choice: ";
     int c;
     if (!(std::cin >> c)) {
@@ -299,19 +308,23 @@ private:
       std::cout << "Bad choice (please enter 1, 2 or 3)\n";
       return;
     }
+    std::string caseStr;
     switch (c) {
     case 1:
+      caseStr = "Lon < " + std::to_string(longtitude);
       applyPredicate("Lon < -80.4841",
-                     [](auto &s) { return s.getLongitude() < -80.4841; });
+                     [&](auto &s) { return s.getLongitude() < longtitude; });
       break;
     case 2:
-      applyPredicate("Street contains Ave", [](auto &s) {
-        return s.getStreet().find("Ave") != std::string::npos;
+      caseStr = "Street contains " + street;
+      applyPredicate(caseStr, [&](auto &s) {
+        return s.getStreet().find(street) != std::string::npos;
       });
       break;
     case 3:
-      applyPredicate("Municipality==Kitchener", [](auto &s) {
-        return s.getMunicipality() == "Kitchener";
+      caseStr = "Municipality==" + municipality;
+      applyPredicate(caseStr, [&](auto &s) {
+        return s.getMunicipality() == municipality;
       });
       break;
     default:
