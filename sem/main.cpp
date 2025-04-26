@@ -209,7 +209,12 @@ public:
     while (true) {
       printMenu();
       int cmd;
-      std::cin >> cmd;
+      if (!(std::cin >> cmd)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Bad choice (please enter 0, 1, 2 or 3)\n";
+        cmd = 4;
+      }
       if (cmd == 0)
         break;
       else if (cmd == 1)
@@ -288,7 +293,7 @@ private:
 
   void runPredicates() {
     double longtitude = -80.4841;
-    std::string street = "Ave";
+    std::string street = "Beverly ";
     std::string municipality = "Kitchener";
     std::cout << "\nPick predicate:\n"
                  "1) longitude < "
@@ -312,7 +317,7 @@ private:
     switch (c) {
     case 1:
       caseStr = "Lon < " + std::to_string(longtitude);
-      applyPredicate("Lon < -80.4841",
+      applyPredicate(caseStr,
                      [&](auto &s) { return s.getLongitude() < longtitude; });
       break;
     case 2:
