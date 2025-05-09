@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <vector>
 #include <limits>
+#include "../libds/adt/table.h"
 
 class BusStop {
 private:
@@ -120,6 +121,8 @@ public:
         else if (cmd==1) goUp();
         else if (cmd==2) chooseChild();
         else if (cmd==3) runPredicates();
+        else if (cmd==4) findByID();
+        else if (cmd==5) filterVectorMenu();
         else std::cout<<"Unknown\n";
       }
     }
@@ -130,7 +133,7 @@ public:
 
     void printMenu() {
       std::cout << "\n=== You are at: [" << nodeDescription(curr) << "]  (has " << h.degree(*curr) << " children)\n"
-                   "0) quit\n1) go up\n2) go to child #\n3) run level-1 filter here\nChoose: ";
+                   "0) quit\n1) go up\n2) go to child #\n3) run level-1 filter here\n4) find stop by ID\n5) filter vector\nChoose: ";
     }
     std::string nodeDescription(Block *b) {
       auto &d = b->data_;
@@ -179,13 +182,81 @@ public:
         default: std::cout<<"Bad choice\n"; break;
       }
     }
+
+    void findByID() {
+      std::cout << "Enter stop ID: ";
+      int id;
+      if (!(std::cin >> id)) {
+        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Invalid ID input\n";
+        return;
+      }
+      BusStop* bs = filter.findStopByID(id);
+      if (bs) {
+        std::cout << "Found: ID=" << bs->getStopID() << ", Municipality=" << bs->getMunicipality()
+                  << ", Street=" << bs->getStreet() << ", Lon=" << bs->getLongitude()
+                  << ", Lat=" << bs->getLatitude() << "\n";
+      } else {
+        std::cout << "No stop with ID " << id << "\n";
+      }
+    }
+
+    void filterVectorMenu() {
+      double lon = -80.4841;
+      std::string st = "Beverly ";
+      std::string muni = "Kitchener";
+      std::cout << "\nPick vector filter:\n"
+                   "1) longitude < " << lon << "\n"
+                   "2) street contains " << st << "\n"
+                   "3) municipality == " << muni << "\n"
+                   "Choice: ";
+      int c;
+      if (!(std::cin >> c)) {
+        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Invalid choice\n";
+        return;
+      }
+      std::vector<BusStop> result;
+      switch (c) {
+        case 1:
+          result = filter.filterVector([&](const BusStop& s){ return s.getLongitude() < lon; });
+          break;
+        case 2:
+          result = filter.filterVector([&](const BusStop& s){ return s.getStreet().find(st) != std::string::npos; });
+          break;
+        case 3:
+          result = filter.filterVector([&](const BusStop& s){ return s.getMunicipality() == muni; });
+          break;
+        default:
+          std::cout << "Invalid choice\n";
+          return;
+      }
+      std::cout << "Filtered vector found " << result.size() << " stops:\n";
+      for (auto& s : result) {
+        std::cout << "  ID=" << s.getStopID() << ", (" << s.getMunicipality() << ", " << s.getStreet() << ")\n";
+      }
+    }
   };
 
   void runNavigator() { Navigator nav(*this); nav.run(); }
 
+  // Lookup by stop ID
+  BusStop* findStopByID(int id) {
+    BusStop** ptr = nullptr;
+    if (busStopsTable_.tryFind(id, ptr)) return *ptr;
+    return nullptr;
+  }
+
+  // Get reference to the vector-filter function
+  template<typename Pred>
+  std::vector<BusStop> filterVector(Pred p) {
+    return filterT<std::vector<BusStop>>(busStopsVec_.begin(), busStopsVec_.end(), p);
+  }
+
 private:
   std::vector<BusStop> busStopsVec_;
   HierarchyT busStopsHierarchy_;
+  ds::adt::SortedSequenceTable<int, BusStop*> busStopsTable_;
 };
 
 // Implementation of combined loader
@@ -193,6 +264,7 @@ void BusStopFilter::loadFromCSV(const std::string &fileName) {
   // Clear existing data
   busStopsVec_.clear();
   busStopsHierarchy_.clear();
+  busStopsTable_.clear();
 
   // Initialize hierarchy root
   auto &root = busStopsHierarchy_.emplaceRoot();
@@ -228,7 +300,12 @@ void BusStopFilter::loadFromCSV(const std::string &fileName) {
     // Construct BusStop and add to vector
     BusStop stop(std::stoi(tokens[0]), std::stod(tokens[2]),
                  std::stod(tokens[3]), tokens[1], tokens[4]);
+    std::cout << "ID: " << stop.getStopID() << ", Street: " << stop.getStreet()
+              << ", Municipality: " << stop.getMunicipality()
+              << ", Longitude: " << stop.getLongitude()
+              << ", Latitude: " << stop.getLatitude() << std::endl;
     busStopsVec_.push_back(stop);
+    busStopsTable_.insert(stop.getStopID(), &busStopsVec_.back());
 
     // Build hierarchy: municipality
     if (stop.getMunicipality() != currentMunicipalityName) {
