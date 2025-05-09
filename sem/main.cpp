@@ -74,7 +74,6 @@ public:
   }
 };
 
-// Global helper: collect all BusStop under a node for filtering
 void collectAllBusStopsUnder(
     ds::amt::MultiWayExplicitHierarchy<BusStopNode>::BlockType *node,
     ds::amt::MultiWayExplicitHierarchy<BusStopNode> &hierarchy,
@@ -102,13 +101,11 @@ public:
     return structureLoc;
   }
 
-  // Loads bus stops from CSV into both vector and hierarchy
   void loadFromCSV(const std::string &fileName);
 
   const std::vector<BusStop>& getBusStopsVec() const { return busStopsVec_; }
   HierarchyT& getHierarchy() { return busStopsHierarchy_; }
 
-  // Navigator moved inside BusStopFilter
   class Navigator {
   public:
     using Block = typename HierarchyT::BlockType;
@@ -242,13 +239,13 @@ public:
 
   // Lookup by stop ID
   BusStop* findStopByID(int id) {
-    BusStop** ptr = nullptr;
-    if (busStopsTable_.tryFind(id, ptr)) return *ptr;
+    BusStop** ptrRef = nullptr;
+    if (busStopsTable_.tryFind(id, ptrRef)) return *ptrRef;
     return nullptr;
   }
 
-  // Get reference to the vector-filter function
-  template<typename Pred>
+  // Filter over the loaded vector
+  template <typename Pred>
   std::vector<BusStop> filterVector(Pred p) {
     return filterT<std::vector<BusStop>>(busStopsVec_.begin(), busStopsVec_.end(), p);
   }
@@ -256,17 +253,14 @@ public:
 private:
   std::vector<BusStop> busStopsVec_;
   HierarchyT busStopsHierarchy_;
-  ds::adt::SortedSequenceTable<int, BusStop*> busStopsTable_;
+  ds::adt::SortedSTab<int, BusStop*> busStopsTable_; 
 };
 
-// Implementation of combined loader
 void BusStopFilter::loadFromCSV(const std::string &fileName) {
-  // Clear existing data
   busStopsVec_.clear();
   busStopsHierarchy_.clear();
   busStopsTable_.clear();
 
-  // Initialize hierarchy root
   auto &root = busStopsHierarchy_.emplaceRoot();
   root.data_.setType(COMPANY);
   root.data_.setName("GRT");
@@ -274,6 +268,15 @@ void BusStopFilter::loadFromCSV(const std::string &fileName) {
   std::ifstream file(fileName);
   if (!file.is_open()) {
     throw std::runtime_error("Subor sa nedal otvorit " + fileName);
+  }
+
+  {
+    std::ifstream countFile(fileName);
+    std::string tmp;
+    std::getline(countFile, tmp);
+    size_t lineCount = 0;
+    while (std::getline(countFile, tmp)) ++lineCount;
+    busStopsVec_.reserve(lineCount);
   }
 
   std::string line;
@@ -297,7 +300,7 @@ void BusStopFilter::loadFromCSV(const std::string &fileName) {
       substr = substr.empty() ? "0" : substr;
       tokens.push_back(substr);
     }
-    // Construct BusStop and add to vector
+
     BusStop stop(std::stoi(tokens[0]), std::stod(tokens[2]),
                  std::stod(tokens[3]), tokens[1], tokens[4]);
     std::cout << "ID: " << stop.getStopID() << ", Street: " << stop.getStreet()
@@ -307,7 +310,6 @@ void BusStopFilter::loadFromCSV(const std::string &fileName) {
     busStopsVec_.push_back(stop);
     busStopsTable_.insert(stop.getStopID(), &busStopsVec_.back());
 
-    // Build hierarchy: municipality
     if (stop.getMunicipality() != currentMunicipalityName) {
       currentMunicipalityName = stop.getMunicipality();
       currMuni = &busStopsHierarchy_.emplaceSon(root, muniIndex++);
@@ -316,7 +318,6 @@ void BusStopFilter::loadFromCSV(const std::string &fileName) {
       currentStreetName.clear();
       streetIndex = 0;
     }
-    // Build hierarchy: street
     if (stop.getStreet() != currentStreetName) {
       currentStreetName = stop.getStreet();
       currStreet = &busStopsHierarchy_.emplaceSon(*currMuni, streetIndex++);
