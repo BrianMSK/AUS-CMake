@@ -303,10 +303,7 @@ void BusStopFilter::loadFromCSV(const std::string &fileName) {
 
     BusStop stop(std::stoi(tokens[0]), std::stod(tokens[2]),
                  std::stod(tokens[3]), tokens[1], tokens[4]);
-    std::cout << "ID: " << stop.getStopID() << ", Street: " << stop.getStreet()
-              << ", Municipality: " << stop.getMunicipality()
-              << ", Longitude: " << stop.getLongitude()
-              << ", Latitude: " << stop.getLatitude() << std::endl;
+
     busStopsVec_.push_back(stop);
     busStopsTable_.insert(stop.getStopID(), &busStopsVec_.back());
 
