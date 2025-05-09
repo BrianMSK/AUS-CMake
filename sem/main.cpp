@@ -183,6 +183,9 @@ std::vector<BusStop> loadBusStopsFromCSV(const std::string fileName) {
     auto stop = BusStop(std::stoi(tokens[0]), std::stod(tokens[2]),
                         std::stod(tokens[3]), tokens[1], tokens[4]);
     busStopsVec.push_back(stop);
+
+    BusStop& bs = busStopsVec[0];
+    BusStop* pbs = &bs;
   }
   return busStopsVec;
 }

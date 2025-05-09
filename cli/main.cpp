@@ -33,8 +33,7 @@ std::vector<std::unique_ptr<ds::tests::Test>> createTests() {
 
   adt->add_test(std::make_unique<ds::tests::SequenceTableTest>());
 
-  // TODO 11
-  //adt->add_test(std::make_unique<ds::tests::NonSequenceTableTest>());
+  adt->add_test(std::make_unique<ds::tests::NonSequenceTableTest>());
 
   // TODO 12
   // adt->add_test(std::make_unique<ds::tests::SortTest>());

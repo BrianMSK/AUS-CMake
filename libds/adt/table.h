@@ -805,17 +805,36 @@ namespace ds::adt {
     template<typename K, typename T, typename ItemType>
     void GeneralBinarySearchTree<K, T, ItemType>::insert(const K& key, T data)
     {
-        // TODO 11
-        // po implementacii vymazte vyhodenie vynimky!
-        throw std::runtime_error("Not implemented yet");
+        BSTNodeType* node = nullptr;
+        if (this->isEmpty())
+        {
+            node = &this->getHierarchy()->emplaceRoot();
+        } else{
+            BSTNodeType* parent = nullptr;
+            if (tryFindNodeWithKey(key, parent))
+            {
+                throw std::logic_error("Duplicate key!");
+            }
+            node = key > parent->data_.key_
+                ? &this->getHierarchy()->insertLeftSon(*parent)
+                : &this->getHierarchy()->insertRightSon(*parent);
+        }
+        node->data_.key_ = key;
+        node->data_.data_ = data;
+        ++size_;
+        this->balanceTree(node);
     }
 
     template<typename K, typename T, typename ItemType>
     bool GeneralBinarySearchTree<K, T, ItemType>::tryFind(const K& key, T*& data) const
     {
-        // TODO 11
-        // po implementacii vymazte vyhodenie vynimky!
-        throw std::runtime_error("Not implemented yet");
+        BSTNodeType* node = nullptr;
+        if(this->tryFindNodeWithKey(key, node)){
+            data = &node->data_.data_;
+            return true;
+        } else{
+            return false;
+        }
     }
 
     template<typename K, typename T, typename ItemType>
@@ -855,9 +874,37 @@ namespace ds::adt {
     template<typename K, typename T, typename ItemType>
     bool GeneralBinarySearchTree<K, T, ItemType>::tryFindNodeWithKey(const K& key, BSTNodeType*& node) const
     {
-        // TODO 11
-        // po implementacii vymazte vyhodenie vynimky!
-        throw std::runtime_error("Not implemented yet");
+        if (this->isEmpty())
+        {
+            return false;
+        }
+        
+        node = this->getHierarchy()->accessRoot();
+        while(node->data_.key_ != key && !this->getHierarchy()->isLeaf(*node)){
+            if (key < node->data_.key_)
+            {
+                if (node->left_ != nullptr)
+                {
+                    node = node->left_;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (node->right_ != nullptr)
+                {
+                    node = node->right_;
+                }
+                else
+                {
+                    return false;
+                }                
+            }
+        }
+        return node->data_.key_ == key;
     }
 
     template<typename K, typename T, typename ItemType>
