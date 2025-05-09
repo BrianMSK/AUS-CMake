@@ -170,13 +170,45 @@ public:
     }
 
     void runPredicates() {
-      double lon=-80.4841; std::string st="Beverly "; std::string muni="Kitchener";
-      std::cout<<"\nPick predicate:\n1) longitude < "<<lon<<"\n2) street-name contains "<<st<<"\n3) municipality == "<<muni<<"\nChoice: "; int c; if(!(std::cin>>c)){ std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(),'\n'); std::cout<<"Bad choice (please enter 1, 2 or 3)\n"; return; }
+      std::cout << "\nPick predicate type:\n1) longitude < value\n2) street-name contains value\n3) municipality == value\nChoice: ";
+      int c;
+      if (!(std::cin >> c)) {
+        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Bad choice (please enter 1, 2 or 3)\n";
+        return;
+      }
+      
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear input buffer
+      
       switch(c) {
-        case 1: applyPredicate("Lon < "+std::to_string(lon), [&](auto &s){return s.getLongitude()<lon;}); break;
-        case 2: applyPredicate("Street contains "+st, [&](auto &s){return s.getStreet().find(st)!=std::string::npos;}); break;
-        case 3: applyPredicate("Municipality=="+muni, [&](auto &s){return s.getMunicipality()==muni;}); break;
-        default: std::cout<<"Bad choice\n"; break;
+        case 1: {
+          std::cout << "Enter longitude value: ";
+          double lon;
+          if (!(std::cin >> lon)) {
+            std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input for longitude\n";
+            return;
+          }
+          applyPredicate("Lon < " + std::to_string(lon), [lon](auto &s) { return s.getLongitude() < lon; });
+          break;
+        }
+        case 2: {
+          std::cout << "Enter street name to search for: ";
+          std::string st;
+          std::getline(std::cin, st);
+          applyPredicate("Street contains " + st, [st](auto &s) { return s.getStreet().find(st) != std::string::npos; });
+          break;
+        }
+        case 3: {
+          std::cout << "Enter municipality name: ";
+          std::string muni;
+          std::getline(std::cin, muni);
+          applyPredicate("Municipality == " + muni, [muni](auto &s) { return s.getMunicipality() == muni; });
+          break;
+        }
+        default:
+          std::cout << "Bad choice\n";
+          break;
       }
     }
 
@@ -199,13 +231,10 @@ public:
     }
 
     void filterVectorMenu() {
-      double lon = -80.4841;
-      std::string st = "Beverly ";
-      std::string muni = "Kitchener";
-      std::cout << "\nPick vector filter:\n"
-                   "1) longitude < " << lon << "\n"
-                   "2) street contains " << st << "\n"
-                   "3) municipality == " << muni << "\n"
+      std::cout << "\nPick vector filter type:\n"
+                   "1) longitude < value\n"
+                   "2) street contains value\n"
+                   "3) municipality == value\n"
                    "Choice: ";
       int c;
       if (!(std::cin >> c)) {
@@ -213,17 +242,36 @@ public:
         std::cout << "Invalid choice\n";
         return;
       }
+      
+      std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear input buffer
+      
       std::vector<BusStop> result;
       switch (c) {
-        case 1:
-          result = filter.filterVector([&](const BusStop& s){ return s.getLongitude() < lon; });
+        case 1: {
+          std::cout << "Enter longitude value: ";
+          double lon;
+          if (!(std::cin >> lon)) {
+            std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input for longitude\n";
+            return;
+          }
+          result = filter.filterVector([lon](const BusStop& s) { return s.getLongitude() < lon; });
           break;
-        case 2:
-          result = filter.filterVector([&](const BusStop& s){ return s.getStreet().find(st) != std::string::npos; });
+        }
+        case 2: {
+          std::cout << "Enter street name to search for: ";
+          std::string st;
+          std::getline(std::cin, st);
+          result = filter.filterVector([st](const BusStop& s) { return s.getStreet().find(st) != std::string::npos; });
           break;
-        case 3:
-          result = filter.filterVector([&](const BusStop& s){ return s.getMunicipality() == muni; });
+        }
+        case 3: {
+          std::cout << "Enter municipality name: ";
+          std::string muni;
+          std::getline(std::cin, muni);
+          result = filter.filterVector([muni](const BusStop& s) { return s.getMunicipality() == muni; });
           break;
+        }
         default:
           std::cout << "Invalid choice\n";
           return;
