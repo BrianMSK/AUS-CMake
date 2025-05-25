@@ -35,7 +35,6 @@ std::vector<std::unique_ptr<ds::tests::Test>> createTests() {
 
   adt->add_test(std::make_unique<ds::tests::NonSequenceTableTest>());
 
-  // TODO 12
   adt->add_test(std::make_unique<ds::tests::SortTest>());
 
   root->add_test(std::move(mm));
