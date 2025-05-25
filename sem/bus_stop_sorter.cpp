@@ -70,6 +70,8 @@ void BusStopSorter::printSortedData(const std::vector<BusStop>& sortedData, cons
 void BusStopSorter::vectorToSequence(const std::vector<BusStop>& data, ds::amt::ImplicitSequence<BusStop>& sequence) const {
     sequence.clear();
     
+    sequence.reserveCapacity(data.size());
+    
     for (const auto& stop : data) {
         sequence.insertLast().data_ = stop;
     }
