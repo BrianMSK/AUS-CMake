@@ -621,13 +621,31 @@ namespace ds::adt {
 
         return *this;
     }
-
+    
     template <typename K, typename T>
     bool HashTable<K, T>::equals(const ADT& other)
     {
-        // TODO 11
-        // po implementacii vymazte vyhodenie vynimky!
-        throw std::runtime_error("Not implemented yet");
+        if (this == &other) { 
+            return true; 
+        }
+        
+        const HashTable& comparisonTable = dynamic_cast<const HashTable&>(other);
+        
+        if (this->size() != comparisonTable.size()) { 
+            return false; 
+        }
+        
+        for (const TableItem<K, T>& currentItem : comparisonTable)
+        {
+            T* foundData = nullptr;
+            if (!this->tryFind(currentItem.key_, foundData) || 
+                *foundData != currentItem.data_)
+            {
+                return false;
+            }
+        }
+        
+        return true;
     }
 
     template <typename K, typename T>
