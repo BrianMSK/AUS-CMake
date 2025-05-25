@@ -15,7 +15,7 @@ public:
 
   void loadFromCSV(const std::string &fileName);
 
-  const std::vector<BusStop>& getBusStopsVec() const;
+  const std::vector<BusStopNode>& getBusStopsVec() const;
   HierarchyT& getHierarchy();
 
   class Navigator {
@@ -37,7 +37,6 @@ public:
     template<class Pred> 
     void applyPredicate(const std::string &name, Pred p);
     
-    // Helper methods to reduce duplication
     int getPredicateChoice();
     std::string getStreetInput();
     std::string getMunicipalityInput();
@@ -50,15 +49,13 @@ public:
 
   void runNavigator();
 
-  // Lookup by stop ID
   BusStop* findStopByID(int id);
 
-  // Filter over the loaded vector
   template <typename Pred>
   std::vector<BusStop> filterVector(Pred p);
 
 private:
-  std::vector<BusStop> busStopsVec_;
+  std::vector<BusStopNode> busStopsVec_;
   HierarchyT busStopsHierarchy_;
   ds::adt::SortedSTab<int, BusStop*> busStopsTable_;
   FilterAlgorithm filterAlgorithm_; // Dedicated standalone filtering algorithm object

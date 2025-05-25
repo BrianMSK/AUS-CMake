@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <limits>
 
-const std::vector<BusStop>& BusStopFilter::getBusStopsVec() const { 
+const std::vector<BusStopNode>& BusStopFilter::getBusStopsVec() const { 
   return busStopsVec_; 
 }
 
@@ -71,11 +71,33 @@ void BusStopFilter::Navigator::chooseChild() {
 
 template<class Pred> 
 void BusStopFilter::Navigator::applyPredicate(const std::string &name, Pred p) {
-  std::vector<BusStop> all;
-  collectAllBusStopsUnder(curr, h, all);
-  auto filtered = filter.filterAlgorithm_.template filter<std::vector<BusStop>>(all.begin(), all.end(), p);
-  std::cout<<"\n-- "<<name<<" : found "<<filtered.size()<<" stops\n";
-  for (auto &s:filtered) std::cout<<"  ID="<<s.getStopID()<<"  ("<<s.getMunicipality()<<", "<<s.getStreet()<<")  long="<<s.getLongitude()<<"\n";
+  
+  // Use hierarchy iterators directly - Level 2 iterators passed to Level 1 algorithm!
+  auto hierarchyBegin = h.begin();  // PreOrderHierarchyIterator from hierarchy
+  auto hierarchyEnd = h.end();      // PreOrderHierarchyIterator from hierarchy
+  
+  // Move iterator to start from current node
+  while (hierarchyBegin != hierarchyEnd && &(*hierarchyBegin) != &(curr->data_)) {
+    ++hierarchyBegin;
+  }
+  
+  // DIRECT USE OF LEVEL 1 ALGORITHM WITH HIERARCHY ITERATORS
+  // Level 2 iterators passed directly to unchanged Level 1 algorithm!
+  auto filtered = filter.filterAlgorithm_.template filter<std::vector<BusStopNode>>(
+    hierarchyBegin,      // Direct hierarchy iterator - Level 2 iterator!
+    hierarchyEnd,        // Direct hierarchy iterator - Level 2 iterator!
+    p                    // Node-based predicate that works with BusStopNode objects
+  );
+  
+  std::cout<<"\n-- "<<name<<" : found "<<filtered.size()<<" nodes\n";
+  for (const auto &nodeResult : filtered) {
+    if (nodeResult.hasBusStop()) {
+      const BusStop* stop = nodeResult.getBusStop();
+      if (stop) {
+        std::cout<<"  ID="<<stop->getStopID()<<"  ("<<stop->getMunicipality()<<", "<<stop->getStreet()<<")  long="<<stop->getLongitude()<<"\n";
+      }
+    }
+  }
 }
 
 // Helper methods to reduce code duplication
@@ -140,18 +162,18 @@ void BusStopFilter::Navigator::runPredicates() {
   switch(c) {
     case 1: {
       std::string st = getStreetInput();
-      applyPredicate("Street contains " + st, isOnStreet(st));
+      applyPredicate("Street contains " + st, nodeIsOnStreet(st));
       break;
     }
     case 2: {
       std::string muni = getMunicipalityInput();
-      applyPredicate("Municipality == " + muni, isInMunicipality(muni));
+      applyPredicate("Municipality == " + muni, nodeIsInMunicipality(muni));
       break;
     }
     case 3: {
       double minLat, maxLat, minLon, maxLon;
       if (getRegionInput(minLat, maxLat, minLon, maxLon)) {
-        applyPredicate("Region [" + std::to_string(minLat) + "," + std::to_string(maxLat) + "] x [" + std::to_string(minLon) + "," + std::to_string(maxLon) + "]", isInRegion(minLat, maxLat, minLon, maxLon));
+        applyPredicate("Region [" + std::to_string(minLat) + "," + std::to_string(maxLat) + "] x [" + std::to_string(minLon) + "," + std::to_string(maxLon) + "]", nodeIsInRegion(minLat, maxLat, minLon, maxLon));
       }
       break;
     }
@@ -187,18 +209,18 @@ void BusStopFilter::Navigator::filterVectorMenu() {
   switch (c) {
     case 1: {
       std::string st = getStreetInput();
-      result = filter.filterVector(isOnStreet(st));
+      result = filter.filterVector(nodeIsOnStreet(st));
       break;
     }
     case 2: {
       std::string muni = getMunicipalityInput();
-      result = filter.filterVector(isInMunicipality(muni));
+      result = filter.filterVector(nodeIsInMunicipality(muni));
       break;
     }
     case 3: {
       double minLat, maxLat, minLon, maxLon;
       if (getRegionInput(minLat, maxLat, minLon, maxLon)) {
-        result = filter.filterVector(isInRegion(minLat, maxLat, minLon, maxLon));
+        result = filter.filterVector(nodeIsInRegion(minLat, maxLat, minLon, maxLon));
       } else {
         return;
       }
@@ -227,7 +249,26 @@ BusStop* BusStopFilter::findStopByID(int id) {
 
 template <typename Pred>
 std::vector<BusStop> BusStopFilter::filterVector(Pred p) {
-    return filterAlgorithm_.filter<std::vector<BusStop>>(busStopsVec_.begin(), busStopsVec_.end(), p); 
+    // Use the Level 1 algorithm directly with the BusStopNode vector
+    auto filteredNodes = filterAlgorithm_.template filter<std::vector<BusStopNode>>(
+        busStopsVec_.begin(), 
+        busStopsVec_.end(), 
+        p  // Node-based predicate
+    );
+    
+    // Extract BusStop objects from filtered BusStopNode objects
+    std::vector<BusStop> result;
+    result.reserve(filteredNodes.size());
+    for (const auto& node : filteredNodes) {
+        if (node.hasBusStop()) {
+            const BusStop* stop = node.getBusStop();
+            if (stop) {
+                result.push_back(*stop);
+            }
+        }
+    }
+    
+    return result;
 }
 
 void BusStopFilter::loadFromCSV(const std::string &fileName) {
@@ -278,8 +319,16 @@ void BusStopFilter::loadFromCSV(const std::string &fileName) {
     BusStop stop(std::stoi(tokens[0]), std::stod(tokens[2]),
                  std::stod(tokens[3]), tokens[1], tokens[4]);
 
-    busStopsVec_.push_back(stop);
-    busStopsTable_.insert(stop.getStopID(), &busStopsVec_.back());
+    // Create BusStopNode directly with the BusStop
+    BusStopNode node;
+    node.setBusStop(stop);
+    busStopsVec_.push_back(node);
+    
+    // Insert pointer to the BusStop inside the node into the table
+    const BusStop* stopPtr = busStopsVec_.back().getBusStop();
+    if (stopPtr) {
+      busStopsTable_.insert(stop.getStopID(), const_cast<BusStop*>(stopPtr));
+    }
 
     if (stop.getMunicipality() != currentMunicipalityName) {
       currentMunicipalityName = stop.getMunicipality();
