@@ -73,21 +73,17 @@ void BusStopFilter::Navigator::chooseChild() {
 template<class Pred> 
 void BusStopFilter::Navigator::applyPredicate(const std::string &name, Pred p) {
   
-  // Use hierarchy iterators directly - Level 2 iterators passed to Level 1 algorithm!
-  auto hierarchyBegin = h.begin();  // PreOrderHierarchyIterator from hierarchy
-  auto hierarchyEnd = h.end();      // PreOrderHierarchyIterator from hierarchy
+  auto hierarchyBegin = h.begin(); 
+  auto hierarchyEnd = h.end();
   
-  // Move iterator to start from current node
   while (hierarchyBegin != hierarchyEnd && &(*hierarchyBegin) != &(curr->data_)) {
     ++hierarchyBegin;
   }
   
-  // DIRECT USE OF LEVEL 1 ALGORITHM WITH HIERARCHY ITERATORS
-  // Level 2 iterators passed directly to unchanged Level 1 algorithm!
   auto filtered = filter.filterAlgorithm_.template filter<std::vector<BusStopNode>>(
-    hierarchyBegin,      // Direct hierarchy iterator - Level 2 iterator!
-    hierarchyEnd,        // Direct hierarchy iterator - Level 2 iterator!
-    p                    // Node-based predicate that works with BusStopNode objects
+    hierarchyBegin,   
+    hierarchyEnd,      
+    p                    
   );
   
   std::cout<<"\n-- "<<name<<" : found "<<filtered.size()<<" nodes\n";
@@ -101,7 +97,6 @@ void BusStopFilter::Navigator::applyPredicate(const std::string &name, Pred p) {
   }
 }
 
-// Helper methods to reduce code duplication
 int BusStopFilter::Navigator::getPredicateChoice() {
   std::cout << "\nPick predicate type:\n1) street-name contains value\n2) municipality == value\n3) region (min/max lat/lon)\nChoice: ";
   int c;
@@ -110,7 +105,7 @@ int BusStopFilter::Navigator::getPredicateChoice() {
     std::cout << "Bad choice (please enter 1, 2, or 3)\n";
     return -1;
   }
-  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear input buffer
+  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
   return c;
 }
 
@@ -257,7 +252,6 @@ void BusStopFilter::Navigator::sortingMenu() {
   
   switch (choice) {
     case 1: {
-      // Sort all bus stops by municipality/street
       dataToSort.reserve(filter.busStopsVec_.size());
       for (const auto& node : filter.busStopsVec_) {
         if (node.hasBusStop()) {
@@ -289,7 +283,6 @@ void BusStopFilter::Navigator::sortingMenu() {
       break;
     }
     case 3: {
-      // Get filtered data from current hierarchy node using Level 1 algorithm
       std::cout << "Choose predicate for filtering:\n";
       int predChoice = getPredicateChoice();
       if (predChoice == -1) return;
@@ -300,11 +293,9 @@ void BusStopFilter::Navigator::sortingMenu() {
         case 1: {
           std::string st = getStreetInput();
           
-          // Use Level 1 filtering algorithm with Level 2 hierarchy iterators
           auto hierarchyBegin = h.begin();
           auto hierarchyEnd = h.end();
           
-          // Move iterator to start from current node
           while (hierarchyBegin != hierarchyEnd && &(*hierarchyBegin) != &(curr->data_)) {
             ++hierarchyBegin;
           }
@@ -350,7 +341,6 @@ void BusStopFilter::Navigator::sortingMenu() {
           return;
       }
       
-      // Extract BusStop objects from filtered nodes
       dataToSort.reserve(filteredNodes.size());
       for (const auto& node : filteredNodes) {
         if (node.hasBusStop()) {
@@ -366,7 +356,6 @@ void BusStopFilter::Navigator::sortingMenu() {
         return;
       }
       
-      // Choose sorting criteria for filtered data
       std::cout << "\nChoose sorting criteria for filtered data:\n";
       std::cout << "1) Municipality/Street (alphabetical)\n";
       std::cout << "2) ID (ascending)\n";
@@ -410,14 +399,12 @@ BusStop* BusStopFilter::findStopByID(int id) {
 
 template <typename Pred>
 std::vector<BusStop> BusStopFilter::filterVector(Pred p) {
-    // Use the Level 1 algorithm directly with the BusStopNode vector
     auto filteredNodes = filterAlgorithm_.template filter<std::vector<BusStopNode>>(
         busStopsVec_.begin(), 
         busStopsVec_.end(), 
-        p  // Node-based predicate
+        p  
     );
     
-    // Extract BusStop objects from filtered BusStopNode objects
     std::vector<BusStop> result;
     result.reserve(filteredNodes.size());
     for (const auto& node : filteredNodes) {
@@ -480,12 +467,10 @@ void BusStopFilter::loadFromCSV(const std::string &fileName) {
     BusStop stop(std::stoi(tokens[0]), std::stod(tokens[2]),
                  std::stod(tokens[3]), tokens[1], tokens[4]);
 
-    // Create BusStopNode directly with the BusStop
     BusStopNode node;
     node.setBusStop(stop);
     busStopsVec_.push_back(node);
     
-    // Insert pointer to the BusStop inside the node into the table
     const BusStop* stopPtr = busStopsVec_.back().getBusStop();
     if (stopPtr) {
       busStopsTable_.insert(stop.getStopID(), const_cast<BusStop*>(stopPtr));
