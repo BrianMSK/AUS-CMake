@@ -11,6 +11,7 @@ private:
   std::string Municipality;
 
 public:
+  BusStop() = default;
   BusStop(int stopID, double longtitude, double lat, std::string street,
           std::string muni);
   
