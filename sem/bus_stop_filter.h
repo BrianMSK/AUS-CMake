@@ -4,6 +4,7 @@
 #include "bus_stop_node.h"
 #include "predicates.h"
 #include "filter_algorithm.h"
+#include "bus_stop_sorter.h"
 #include "../libds/amt/explicit_hierarchy.h"
 #include "../libds/adt/table.h"
 #include <vector>
@@ -45,6 +46,7 @@ public:
     void runPredicates();
     void findByID();
     void filterVectorMenu();
+    void sortingMenu();  // New sorting functionality
   };
 
   void runNavigator();
@@ -59,4 +61,5 @@ private:
   HierarchyT busStopsHierarchy_;
   ds::adt::SortedSTab<int, BusStop*> busStopsTable_;
   FilterAlgorithm filterAlgorithm_; // Dedicated standalone filtering algorithm object
+  BusStopSorter sorter_; // Dedicated standalone sorting algorithm object
 };

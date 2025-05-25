@@ -23,8 +23,8 @@ void BusStopFilter::Navigator::run() {
     if (!(std::cin >> cmd)) { 
       std::cin.clear(); 
       std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
-      std::cout << "Bad choice (please enter 0, 1, 2 or 3)\n"; 
-      cmd = 4; 
+      std::cout << "Bad choice (please enter 0-6)\n"; 
+      cmd = 7; 
     }
     if      (cmd==0) break;
     else if (cmd==1) goUp();
@@ -32,13 +32,14 @@ void BusStopFilter::Navigator::run() {
     else if (cmd==3) runPredicates();
     else if (cmd==4) findByID();
     else if (cmd==5) filterVectorMenu();
+    else if (cmd==6) sortingMenu();
     else std::cout<<"Unknown\n";
   }
 }
 
 void BusStopFilter::Navigator::printMenu() {
   std::cout << "\n=== You are at: [" << nodeDescription(curr) << "]  (has " << h.degree(*curr) << " children)\n"
-               "0) quit\n1) go up\n2) go to child #\n3) run level-1 filter here\n4) find stop by ID\n5) filter vector\nChoose: ";
+               "0) quit\n1) go up\n2) go to child #\n3) run level-1 filter here\n4) find stop by ID\n5) filter vector\n6) sort data (Level 4)\nChoose: ";
 }
 
 std::string BusStopFilter::Navigator::nodeDescription(Block *b) {
@@ -233,6 +234,166 @@ void BusStopFilter::Navigator::filterVectorMenu() {
   std::cout << "Filtered vector found " << result.size() << " stops:\n";
   for (auto& s : result) {
     std::cout << "  ID=" << s.getStopID() << ", (" << s.getMunicipality() << ", " << s.getStreet() << ")\n";
+  }
+}
+
+void BusStopFilter::Navigator::sortingMenu() {
+  std::cout << "\n=== Level 4: Universal Sorting Algorithm ===\n";
+  std::cout << "Choose sorting method:\n";
+  std::cout << "1) Sort by Municipality/Street (alphabetical)\n";
+  std::cout << "2) Sort by ID (ascending)\n";
+  std::cout << "3) Sort filtered data from current hierarchy node\n";
+  std::cout << "Choice: ";
+  
+  int choice;
+  if (!(std::cin >> choice)) {
+    std::cin.clear(); 
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "Invalid input\n";
+    return;
+  }
+  
+  std::vector<BusStop> dataToSort;
+  
+  switch (choice) {
+    case 1: {
+      // Sort all bus stops by municipality/street
+      dataToSort.reserve(filter.busStopsVec_.size());
+      for (const auto& node : filter.busStopsVec_) {
+        if (node.hasBusStop()) {
+          const BusStop* stop = node.getBusStop();
+          if (stop) {
+            dataToSort.push_back(*stop);
+          }
+        }
+      }
+      
+      auto sortedData = filter.sorter_.sortByStreetMunicipality(dataToSort);
+      filter.sorter_.printSortedData(sortedData, "Municipality/Street (alphabetical)");
+      break;
+    }
+    case 2: {
+      // Sort all bus stops by ID
+      dataToSort.reserve(filter.busStopsVec_.size());
+      for (const auto& node : filter.busStopsVec_) {
+        if (node.hasBusStop()) {
+          const BusStop* stop = node.getBusStop();
+          if (stop) {
+            dataToSort.push_back(*stop);
+          }
+        }
+      }
+      
+      auto sortedData = filter.sorter_.sortByID(dataToSort);
+      filter.sorter_.printSortedData(sortedData, "ID (ascending)");
+      break;
+    }
+    case 3: {
+      // Get filtered data from current hierarchy node using Level 1 algorithm
+      std::cout << "Choose predicate for filtering:\n";
+      int predChoice = getPredicateChoice();
+      if (predChoice == -1) return;
+      
+      std::vector<BusStopNode> filteredNodes;
+      
+      switch(predChoice) {
+        case 1: {
+          std::string st = getStreetInput();
+          
+          // Use Level 1 filtering algorithm with Level 2 hierarchy iterators
+          auto hierarchyBegin = h.begin();
+          auto hierarchyEnd = h.end();
+          
+          // Move iterator to start from current node
+          while (hierarchyBegin != hierarchyEnd && &(*hierarchyBegin) != &(curr->data_)) {
+            ++hierarchyBegin;
+          }
+          
+          filteredNodes = filter.filterAlgorithm_.template filter<std::vector<BusStopNode>>(
+            hierarchyBegin, hierarchyEnd, nodeIsOnStreet(st)
+          );
+          break;
+        }
+        case 2: {
+          std::string muni = getMunicipalityInput();
+          
+          auto hierarchyBegin = h.begin();
+          auto hierarchyEnd = h.end();
+          
+          while (hierarchyBegin != hierarchyEnd && &(*hierarchyBegin) != &(curr->data_)) {
+            ++hierarchyBegin;
+          }
+          
+          filteredNodes = filter.filterAlgorithm_.template filter<std::vector<BusStopNode>>(
+            hierarchyBegin, hierarchyEnd, nodeIsInMunicipality(muni)
+          );
+          break;
+        }
+        case 3: {
+          double minLat, maxLat, minLon, maxLon;
+          if (!getRegionInput(minLat, maxLat, minLon, maxLon)) return;
+          
+          auto hierarchyBegin = h.begin();
+          auto hierarchyEnd = h.end();
+          
+          while (hierarchyBegin != hierarchyEnd && &(*hierarchyBegin) != &(curr->data_)) {
+            ++hierarchyBegin;
+          }
+          
+          filteredNodes = filter.filterAlgorithm_.template filter<std::vector<BusStopNode>>(
+            hierarchyBegin, hierarchyEnd, nodeIsInRegion(minLat, maxLat, minLon, maxLon)
+          );
+          break;
+        }
+        default:
+          std::cout << "Invalid choice\n";
+          return;
+      }
+      
+      // Extract BusStop objects from filtered nodes
+      dataToSort.reserve(filteredNodes.size());
+      for (const auto& node : filteredNodes) {
+        if (node.hasBusStop()) {
+          const BusStop* stop = node.getBusStop();
+          if (stop) {
+            dataToSort.push_back(*stop);
+          }
+        }
+      }
+      
+      if (dataToSort.empty()) {
+        std::cout << "No data to sort after filtering.\n";
+        return;
+      }
+      
+      // Choose sorting criteria for filtered data
+      std::cout << "\nChoose sorting criteria for filtered data:\n";
+      std::cout << "1) Municipality/Street (alphabetical)\n";
+      std::cout << "2) ID (ascending)\n";
+      std::cout << "Choice: ";
+      
+      int sortChoice;
+      if (!(std::cin >> sortChoice)) {
+        std::cin.clear(); 
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Invalid input\n";
+        return;
+      }
+      
+      if (sortChoice == 1) {
+        auto sortedData = filter.sorter_.sortByStreetMunicipality(dataToSort);
+        filter.sorter_.printSortedData(sortedData, "Filtered - Municipality/Street (alphabetical)");
+      } else if (sortChoice == 2) {
+        auto sortedData = filter.sorter_.sortByID(dataToSort);
+        filter.sorter_.printSortedData(sortedData, "Filtered - ID (ascending)");
+      } else {
+        std::cout << "Invalid choice\n";
+      }
+      break;
+    }
+    default:
+      std::cout << "Invalid choice\n";
+      break;
   }
 }
 
