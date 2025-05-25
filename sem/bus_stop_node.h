@@ -23,12 +23,9 @@ public:
   void setName(std::string &&n);
 
   bool hasBusStop() const;
-
   const BusStop *getBusStop() const;
   BusStop *getBusStop();
-
   void setBusStop(const BusStop &bs);
-  void clearBusStop();
 
   bool operator==(const BusStopNode &o) const;
 };
