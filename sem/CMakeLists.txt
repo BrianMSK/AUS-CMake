@@ -1,4 +1,10 @@
-add_executable(sem main.cpp)
+add_executable(sem 
+    main.cpp 
+    bus_stop.cpp 
+    bus_stop_node.cpp 
+    predicates.cpp 
+    bus_stop_filter.cpp
+)
 
 target_compile_features(sem PUBLIC cxx_std_17)
 

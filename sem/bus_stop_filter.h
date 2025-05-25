@@ -1,0 +1,60 @@
+#pragma once
+
+#include "bus_stop.h"
+#include "bus_stop_node.h"
+#include "predicates.h"
+#include "../libds/amt/explicit_hierarchy.h"
+#include "../libds/adt/table.h"
+#include <vector>
+#include <string>
+
+class BusStopFilter {
+public:
+  using HierarchyT = ds::amt::MultiWayExplicitHierarchy<BusStopNode>;
+
+  template <typename containerT, typename Iterator, typename Predicate>
+  containerT filterT(Iterator itBeg_, Iterator itEnd_, Predicate predicate_);
+
+  void loadFromCSV(const std::string &fileName);
+
+  const std::vector<BusStop>& getBusStopsVec() const;
+  HierarchyT& getHierarchy();
+
+  class Navigator {
+  public:
+    using Block = typename HierarchyT::BlockType;
+    Navigator(BusStopFilter &f);
+    void run();
+    
+  private:
+    BusStopFilter &filter;
+    HierarchyT &h;
+    Block *curr;
+
+    void printMenu();
+    std::string nodeDescription(Block *b);
+    void goUp();
+    void chooseChild();
+    
+    template<class Pred> 
+    void applyPredicate(const std::string &name, Pred p);
+    
+    void runPredicates();
+    void findByID();
+    void filterVectorMenu();
+  };
+
+  void runNavigator();
+
+  // Lookup by stop ID
+  BusStop* findStopByID(int id);
+
+  // Filter over the loaded vector
+  template <typename Pred>
+  std::vector<BusStop> filterVector(Pred p);
+
+private:
+  std::vector<BusStop> busStopsVec_;
+  HierarchyT busStopsHierarchy_;
+  ds::adt::SortedSTab<int, BusStop*> busStopsTable_; 
+};
