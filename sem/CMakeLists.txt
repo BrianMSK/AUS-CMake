@@ -3,6 +3,7 @@ add_executable(sem
     bus_stop.cpp 
     bus_stop_node.cpp 
     bus_stop_filter.cpp
+    bus_stop_sorter.cpp
 )
 
 target_compile_features(sem PUBLIC cxx_std_17)
