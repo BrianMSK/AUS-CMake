@@ -6,6 +6,7 @@
 #include <vector>
 #include <functional>
 #include <string>
+#include <memory>
 
 class BusStopSorter {
 public:
