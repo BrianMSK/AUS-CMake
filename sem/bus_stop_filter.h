@@ -3,6 +3,7 @@
 #include "bus_stop.h"
 #include "bus_stop_node.h"
 #include "predicates.h"
+#include "filter_algorithm.h"
 #include "../libds/amt/explicit_hierarchy.h"
 #include "../libds/adt/table.h"
 #include <vector>
@@ -11,9 +12,6 @@
 class BusStopFilter {
 public:
   using HierarchyT = ds::amt::MultiWayExplicitHierarchy<BusStopNode>;
-
-  template <typename containerT, typename Iterator, typename Predicate>
-  containerT filterT(Iterator itBeg_, Iterator itEnd_, Predicate predicate_);
 
   void loadFromCSV(const std::string &fileName);
 
@@ -39,6 +37,12 @@ public:
     template<class Pred> 
     void applyPredicate(const std::string &name, Pred p);
     
+    // Helper methods to reduce duplication
+    int getPredicateChoice();
+    std::string getStreetInput();
+    std::string getMunicipalityInput();
+    bool getRegionInput(double& minLat, double& maxLat, double& minLon, double& maxLon);
+    
     void runPredicates();
     void findByID();
     void filterVectorMenu();
@@ -56,5 +60,6 @@ public:
 private:
   std::vector<BusStop> busStopsVec_;
   HierarchyT busStopsHierarchy_;
-  ds::adt::SortedSTab<int, BusStop*> busStopsTable_; 
+  ds::adt::SortedSTab<int, BusStop*> busStopsTable_;
+  FilterAlgorithm filterAlgorithm_; // Dedicated standalone filtering algorithm object
 };

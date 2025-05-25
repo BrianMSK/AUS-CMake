@@ -5,18 +5,6 @@
 #include <stdexcept>
 #include <limits>
 
-template <typename containerT, typename Iterator, typename Predicate>
-containerT BusStopFilter::filterT(Iterator itBeg_, Iterator itEnd_, Predicate predicate_) {
-  containerT structureLoc;
-  while (itBeg_ != itEnd_) {
-    if (predicate_(*itBeg_)) {
-      structureLoc.push_back(*itBeg_);
-    }
-    ++itBeg_;
-  }
-  return structureLoc;
-}
-
 const std::vector<BusStop>& BusStopFilter::getBusStopsVec() const { 
   return busStopsVec_; 
 }
@@ -85,67 +73,86 @@ template<class Pred>
 void BusStopFilter::Navigator::applyPredicate(const std::string &name, Pred p) {
   std::vector<BusStop> all;
   collectAllBusStopsUnder(curr, h, all);
-  auto filtered = filter.template filterT<std::vector<BusStop>>(all.begin(), all.end(), p);
+  auto filtered = filter.filterAlgorithm_.template filter<std::vector<BusStop>>(all.begin(), all.end(), p);
   std::cout<<"\n-- "<<name<<" : found "<<filtered.size()<<" stops\n";
   for (auto &s:filtered) std::cout<<"  ID="<<s.getStopID()<<"  ("<<s.getMunicipality()<<", "<<s.getStreet()<<")  long="<<s.getLongitude()<<"\n";
 }
 
-void BusStopFilter::Navigator::runPredicates() {
+// Helper methods to reduce code duplication
+int BusStopFilter::Navigator::getPredicateChoice() {
   std::cout << "\nPick predicate type:\n1) street-name contains value\n2) municipality == value\n3) region (min/max lat/lon)\nChoice: ";
   int c;
   if (!(std::cin >> c)) {
     std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Bad choice (please enter 1, 2, or 3)\n";
-    return;
+    return -1;
   }
-  
   std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear input buffer
+  return c;
+}
+
+std::string BusStopFilter::Navigator::getStreetInput() {
+  std::cout << "Enter street name to search for: ";
+  std::string st;
+  std::getline(std::cin, st);
+  return st;
+}
+
+std::string BusStopFilter::Navigator::getMunicipalityInput() {
+  std::cout << "Enter municipality name: ";
+  std::string muni;
+  std::getline(std::cin, muni);
+  return muni;
+}
+
+bool BusStopFilter::Navigator::getRegionInput(double& minLat, double& maxLat, double& minLon, double& maxLon) {
+  std::cout << "Enter min latitude: ";
+  if (!(std::cin >> minLat)) {
+    std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "Invalid input for min latitude\n";
+    return false;
+  }
+  std::cout << "Enter max latitude: ";
+  if (!(std::cin >> maxLat)) {
+    std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "Invalid input for max latitude\n";
+    return false;
+  }
+  std::cout << "Enter min longitude: ";
+  if (!(std::cin >> minLon)) {
+    std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "Invalid input for min longitude\n";
+    return false;
+  }
+  std::cout << "Enter max longitude: ";
+  if (!(std::cin >> maxLon)) {
+    std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cout << "Invalid input for max longitude\n";
+    return false;
+  }
+  return true;
+}
+
+void BusStopFilter::Navigator::runPredicates() {
+  int c = getPredicateChoice();
+  if (c == -1) return;
   
   switch(c) {
     case 1: {
-      std::cout << "Enter street name to search for: ";
-      std::string st;
-      std::getline(std::cin, st);
+      std::string st = getStreetInput();
       applyPredicate("Street contains " + st, isOnStreet(st));
       break;
     }
     case 2: {
-      std::cout << "Enter municipality name: ";
-      std::string muni;
-      std::getline(std::cin, muni);
+      std::string muni = getMunicipalityInput();
       applyPredicate("Municipality == " + muni, isInMunicipality(muni));
       break;
     }
     case 3: {
-      std::cout << "Enter min latitude: ";
-      double minLat;
-      if (!(std::cin >> minLat)) {
-        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input for min latitude\n";
-        return;
+      double minLat, maxLat, minLon, maxLon;
+      if (getRegionInput(minLat, maxLat, minLon, maxLon)) {
+        applyPredicate("Region [" + std::to_string(minLat) + "," + std::to_string(maxLat) + "] x [" + std::to_string(minLon) + "," + std::to_string(maxLon) + "]", isInRegion(minLat, maxLat, minLon, maxLon));
       }
-      std::cout << "Enter max latitude: ";
-      double maxLat;
-      if (!(std::cin >> maxLat)) {
-        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input for max latitude\n";
-        return;
-      }
-      std::cout << "Enter min longitude: ";
-      double minLon;
-      if (!(std::cin >> minLon)) {
-        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input for min longitude\n";
-        return;
-      }
-      std::cout << "Enter max longitude: ";
-      double maxLon;
-      if (!(std::cin >> maxLon)) {
-        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input for max longitude\n";
-        return;
-      }
-      applyPredicate("Region [" + std::to_string(minLat) + "," + std::to_string(maxLat) + "] x [" + std::to_string(minLon) + "," + std::to_string(maxLon) + "]", isInRegion(minLat, maxLat, minLon, maxLon));
       break;
     }
     default:
@@ -173,66 +180,28 @@ void BusStopFilter::Navigator::findByID() {
 }
 
 void BusStopFilter::Navigator::filterVectorMenu() {
-  std::cout << "\nPick vector filter type:\n"
-               "1) street contains value\n"
-               "2) municipality == value\n"
-               "3) region (min/max lat/lon)\n"
-               "Choice: ";
-  int c;
-  if (!(std::cin >> c)) {
-    std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::cout << "Invalid choice\n";
-    return;
-  }
-  
-  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Clear input buffer
+  int c = getPredicateChoice();
+  if (c == -1) return;
   
   std::vector<BusStop> result;
   switch (c) {
     case 1: {
-      std::cout << "Enter street name to search for: ";
-      std::string st;
-      std::getline(std::cin, st);
+      std::string st = getStreetInput();
       result = filter.filterVector(isOnStreet(st));
       break;
     }
     case 2: {
-      std::cout << "Enter municipality name: ";
-      std::string muni;
-      std::getline(std::cin, muni);
+      std::string muni = getMunicipalityInput();
       result = filter.filterVector(isInMunicipality(muni));
       break;
     }
     case 3: {
-      std::cout << "Enter min latitude: ";
-      double minLat;
-      if (!(std::cin >> minLat)) {
-        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input for min latitude\n";
+      double minLat, maxLat, minLon, maxLon;
+      if (getRegionInput(minLat, maxLat, minLon, maxLon)) {
+        result = filter.filterVector(isInRegion(minLat, maxLat, minLon, maxLon));
+      } else {
         return;
       }
-      std::cout << "Enter max latitude: ";
-      double maxLat;
-      if (!(std::cin >> maxLat)) {
-        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input for max latitude\n";
-        return;
-      }
-      std::cout << "Enter min longitude: ";
-      double minLon;
-      if (!(std::cin >> minLon)) {
-        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input for min longitude\n";
-        return;
-      }
-      std::cout << "Enter max longitude: ";
-      double maxLon;
-      if (!(std::cin >> maxLon)) {
-        std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::cout << "Invalid input for max longitude\n";
-        return;
-      }
-      result = filter.filterVector(isInRegion(minLat, maxLat, minLon, maxLon));
       break;
     }
     default:
@@ -258,7 +227,7 @@ BusStop* BusStopFilter::findStopByID(int id) {
 
 template <typename Pred>
 std::vector<BusStop> BusStopFilter::filterVector(Pred p) {
-  return filterT<std::vector<BusStop>>(busStopsVec_.begin(), busStopsVec_.end(), p);
+    return filterAlgorithm_.filter<std::vector<BusStop>>(busStopsVec_.begin(), busStopsVec_.end(), p); 
 }
 
 void BusStopFilter::loadFromCSV(const std::string &fileName) {
