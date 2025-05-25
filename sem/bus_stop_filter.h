@@ -59,7 +59,7 @@ public:
 private:
   std::vector<BusStopNode> busStopsVec_;
   HierarchyT busStopsHierarchy_;
-  ds::adt::SortedSTab<int, BusStop*> busStopsTable_;
+  ds::adt::HashTable<int, BusStop*> busStopsTable_;
   FilterAlgorithm filterAlgorithm_; 
   BusStopSorter sorter_; 
 };

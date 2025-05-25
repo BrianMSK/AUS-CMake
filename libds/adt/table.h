@@ -674,25 +674,52 @@ namespace ds::adt {
     template <typename K, typename T>
     void HashTable<K, T>::insert(const K& key, T data)
     {
-        // TODO 11
-        // po implementacii vymazte vyhodenie vynimky!
-        throw std::runtime_error("Not implemented yet");
+        const size_t index = hashFunction_(key) % primaryRegion_->size();
+        auto* block = primaryRegion_->access(index);
+        SynonymTable* st = block->data_;
+
+        if (st == nullptr) {
+            st = new SynonymTable();
+            block->data_ = st;
+        }
+
+        st->insert(key, std::move(data));
+        ++size_;
     }
 
     template <typename K, typename T>
     bool HashTable<K, T>::tryFind(const K& key, T*& data) const
     {
-        // TODO 11
-        // po implementacii vymazte vyhodenie vynimky!
-        throw std::runtime_error("Not implemented yet");
+        const size_t index = hashFunction_(key) % primaryRegion_->size();
+        auto* bucketBlock = primaryRegion_->access(index);
+        SynonymTable* bucket = bucketBlock->data_;
+
+        if (bucket == nullptr) {
+            return false;
+        }
+        return bucket->tryFind(key, data);
     }
 
     template <typename K, typename T>
     T HashTable<K, T>::remove(const K& key)
     {
-        // TODO 11
-        // po implementacii vymazte vyhodenie vynimky!
-        throw std::runtime_error("Not implemented yet");
+        const size_t index = hashFunction_(key) % primaryRegion_->size();
+        auto* bucketBlock = primaryRegion_->access(index);
+        SynonymTable* bucket = bucketBlock->data_;
+
+        if (bucket == nullptr) {        // vôbec tu nič nie je
+            throw std::out_of_range("No such key!");
+        }
+
+        T result = bucket->remove(key);
+        --size_;
+
+        // Ak sme reťaz úplne vyprázdnili, zmažeme ju a v slote necháme nullptr
+        if (bucket->isEmpty()) {
+            delete bucket;
+            bucketBlock->data_ = nullptr;
+        }
+        return result;
     }
 
     template <typename K, typename T>
@@ -733,9 +760,31 @@ namespace ds::adt {
     template <typename K, typename T>
     typename HashTable<K, T>::HashTableIterator& HashTable<K, T>::HashTableIterator::operator++()
     {
-        // TODO 11
-        // po implementacii vymazte vyhodenie vynimky!
-        throw std::runtime_error("Not implemented yet");
+        if (synonymIterator_ == nullptr) {
+            return *this;
+        }
+
+        ++(*synonymIterator_);                        
+
+        if (*synonymIterator_ != (**tablesCurrent_)->end()) {
+            return *this;                             
+        }
+
+        delete synonymIterator_;
+        synonymIterator_ = nullptr;
+
+        ++(*tablesCurrent_);
+        while (*tablesCurrent_ != *tablesLast_
+            && **tablesCurrent_ == nullptr)
+        {
+            ++(*tablesCurrent_);                      
+        }
+
+        if (*tablesCurrent_ != *tablesLast_) {
+            synonymIterator_ =
+                new SynonymTableIterator((**tablesCurrent_)->begin());
+        }
+        return *this;
     }
 
     template <typename K, typename T>
