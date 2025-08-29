@@ -2,6 +2,8 @@
 build/
 build/*
 .cache/
+docs/
+docs/*
 
 ### CMake ###
 CMakeLists.txt.user
